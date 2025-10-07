@@ -1,0 +1,6 @@
+[
+    {
+        "merged": "com.gateai.sdk.gateai-release-25:/layout-v26/abc_screen_toolbar.xml",
+        "source": "com.gateai.sdk.gateai-appcompat-1.7.0-6:/layout-v26/abc_screen_toolbar.xml"
+    }
+]

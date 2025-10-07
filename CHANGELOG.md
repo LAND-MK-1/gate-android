@@ -1,0 +1,59 @@
+# Changelog
+
+All notable changes to the Gate/AI Android SDK will be documented in this file.
+
+The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
+and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
+
+## [1.0.0] - 2025-10-07
+
+### Added
+- Initial release of Gate/AI Android SDK
+- Hardware-backed device key management using Android Keystore
+- StrongBox preference for enhanced security (Android 9+)
+- P-256 ECDSA key generation with JWK export (RFC 7517)
+- JWK thumbprint calculation (RFC 7638)
+- Play Integrity API integration for device attestation
+- DPoP (Demonstrating Proof-of-Possession) token generation (RFC 9449)
+- Automatic token lifecycle management with 60-second grace period
+- Token caching and refresh
+- `/attest/challenge` API integration
+- `/token` exchange API with DPoP proof
+- Automatic DPoP nonce retry handling (401 with DPoP-Nonce header)
+- `authorizationHeaders()` method for custom HTTP client integration
+- `performProxyRequest()` method for all-in-one proxied requests
+- Development token flow for emulator/simulator testing
+- Ktor-based HTTP client with OkHttp engine
+- Configurable logging (DEBUG, INFO, WARN, ERROR, NONE)
+- Comprehensive error handling with `GateApiException`
+- ProGuard/R8 consumer rules for proper code shrinking
+- Complete Kotlin documentation
+- Jetpack Compose sample app demonstrating SDK usage
+
+### Security
+- Private keys are non-exportable from Android Keystore
+- Keys are bound to app package name
+- DER to raw signature conversion for ES256 (prevents malleability)
+- Secure nonce handling with Play Integrity
+- HTTPS-only communication enforced
+
+### Documentation
+- Comprehensive README with quick start guide
+- PUBLISHING.md with distribution instructions
+- Sample app with Compose UI
+- Inline KDoc for all public APIs
+- Architecture diagrams and flow charts
+
+## [Unreleased]
+
+### Planned
+- Analytics headers support
+- Instrumented tests with Play Integrity mocking
+- Unit tests for key components
+- Kotlin Multiplatform support consideration
+- Token refresh scheduling optimizations
+- Network retry policies
+- Request/response logging interceptor
+
+[1.0.0]: https://github.com/YOUR_ORG/GateAI/releases/tag/v1.0.0
+
