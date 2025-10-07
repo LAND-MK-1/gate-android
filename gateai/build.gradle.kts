@@ -146,7 +146,12 @@ publishing {
 }
 
 signing {
-    sign(publishing.publications["release"])
+    // Only sign if signing credentials are configured
+    val signingKey = project.findProperty("signing.keyId") as String?
+        ?: System.getenv("SIGNING_KEY_ID")
+    if (signingKey != null) {
+        sign(publishing.publications["release"])
+    }
 }
 
 // Convenience tasks
