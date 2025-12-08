@@ -38,7 +38,7 @@ import java.util.UUID
  * ```kotlin
  * // Initialize the client
  * val configuration = GateAIConfiguration(
- *     baseUrl = "https://yourteam.us01.gate-ai.net",
+ *     baseUrl = "https://yourteam.in.gate-ai.net",
  *     packageName = packageName,
  *     signingCertSha256 = "AA:BB:CC:...",
  *     logLevel = GateAIConfiguration.LogLevel.INFO
