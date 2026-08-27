@@ -33,6 +33,7 @@ val configuration = GateAIConfiguration(
     baseUrl = "https://yourteam.in.gate-ai.net",
     packageName = packageName,
     signingCertSha256 = "AA:BB:CC:DD:EE:FF:...", // Your app's SHA-256 fingerprint
+    cloudProjectNumber = 123456789012L, // Google Cloud project number (see Play Integrity Setup)
     developmentToken = null, // Use for testing without Play Integrity
     logLevel = GateAIConfiguration.LogLevel.INFO
 )
@@ -115,7 +116,8 @@ For production apps, Play Integrity requires proper setup in Google Cloud Consol
 1. Go to [Google Play Console](https://play.google.com/console)
 2. Select your app
 3. Navigate to **Release** → **Setup** → **App Integrity**
-4. Note your **Cloud Project Number** (you'll need this)
+4. Link a **Google Cloud project** (create one if needed) and note its **project number** — the numeric value shown on the Google Cloud Console "Project info" card
+5. Set that number as `cloudProjectNumber` in your `GateAIConfiguration`. Always set it: Google requires it for any build not installed from the Play Store — which includes every development build you run from Android Studio or install with `adb` — and it is harmless for Play Store installs. Without it, development builds fail with Integrity error `-16` before any network call.
 
 ### Step 2: Enable Play Integrity API in Google Cloud Console
 
@@ -147,14 +149,26 @@ Use the SHA-256 fingerprint from your release keystore:
 keytool -list -v -keystore your-release.keystore -alias your-alias
 ```
 
-### Step 4: Test Your Integration
+### Step 4: Grant Gate/AI permission to verify your app
+
+Gate/AI verifies integrity tokens server-side by calling Google's `decodeIntegrityToken` API, which is authorized against **your** cloud project. You must grant Gate/AI's service account access — no keys or secrets are exchanged, and you can revoke the grant at any time:
+
+1. In [Google Cloud Console](https://console.cloud.google.com), open the project linked in Step 1
+2. Navigate to **IAM & Admin** → **IAM** → **Grant access**
+3. Add this principal: `gateai-integrity-check@gateai-506813.iam.gserviceaccount.com`
+4. Assign the role **Service Usage Consumer**
+5. Save
+
+Until this grant exists, attestation fails server-side even when your app obtains integrity tokens successfully.
+
+### Step 5: Test Your Integration
 
 1. **Build a signed APK/AAB** with your release key
 2. **Upload to Play Console** (Internal Testing track is fine)
-3. **Install from Play Store** (must be installed via Play Store, not sideloaded)
+3. **Install from Play Store** for the fully Play-recognized path — or test a development build directly if your gate has "Require Play-recognized app" turned off in the Gate/AI Portal
 4. **Run your app** and test authentication
 
-### Step 5: Monitor for Errors
+### Step 6: Monitor for Errors
 
 Enable debug logging to see detailed error messages:
 
