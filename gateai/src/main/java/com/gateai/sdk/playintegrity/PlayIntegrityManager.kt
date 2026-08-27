@@ -12,6 +12,7 @@ import kotlinx.coroutines.withContext
 
 class PlayIntegrityManager(
     context: Context,
+    private val cloudProjectNumber: Long? = null,
     private val logger: GateLogger? = null
 ) {
     private val appContext = context.applicationContext
@@ -20,8 +21,11 @@ class PlayIntegrityManager(
     suspend fun requestIntegrityToken(nonce: String): String = withContext(Dispatchers.IO) {
         logger?.debug("Requesting Play Integrity token with nonce: ${nonce.take(10)}...")
         
+        // Google requires the cloud project number for sideloaded installs
+        // (anything not installed via the Play Store). Optional for Play installs.
         val request = IntegrityTokenRequest.builder()
             .setNonce(nonce)
+            .apply { cloudProjectNumber?.let { setCloudProjectNumber(it) } }
             .build()
 
         runCatching {

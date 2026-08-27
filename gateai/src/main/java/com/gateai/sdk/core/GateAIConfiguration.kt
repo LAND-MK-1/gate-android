@@ -8,6 +8,7 @@ data class GateAIConfiguration(
     val packageName: String,
     val signingCertSha256: String,
     val developmentToken: String? = null,
+    val cloudProjectNumber: Long? = null,
     val logLevel: LogLevel = LogLevel.INFO
 ) {
     init {

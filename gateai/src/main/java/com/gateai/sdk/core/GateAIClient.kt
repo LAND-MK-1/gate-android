@@ -329,7 +329,7 @@ class GateAIClient internal constructor(
             val deviceKeyManager = DeviceKeyManager.create(context)
             val httpClient = GateHttpClient(configuration, logger)
             val authApiClient = AuthApiClient(httpClient)
-            val integrityManager = PlayIntegrityManager(context)
+            val integrityManager = PlayIntegrityManager(context, configuration.cloudProjectNumber)
             val timeProvider = SystemTimeProvider()
 
             logger.setLogLevel(configuration.logLevel)
