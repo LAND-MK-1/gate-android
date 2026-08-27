@@ -5,9 +5,16 @@ All notable changes to the Gate/AI Android SDK will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [1.0.0] - 2025-10-07
+## [1.0.0] - 2026-08-27
+
+### Fixed
+- Token exchange now includes the attestation challenge nonce required by the server
+- DPoP header serializes the device public key JWK correctly (previously crashed the signer)
+- JSON encoding emits `platform` and attestation `type` discriminator fields and omits null optionals
+- Play Integrity requests support `cloudProjectNumber` (required for sideloaded installs; Google error -16 otherwise)
 
 ### Added
+- `GateAIConfiguration.cloudProjectNumber` for classic Play Integrity requests
 - Initial release of Gate/AI Android SDK
 - Hardware-backed device key management using Android Keystore
 - StrongBox preference for enhanced security (Android 9+)
