@@ -28,7 +28,14 @@ class GateHttpClient(
 ) {
     private val client = HttpClient(OkHttp) {
         install(ContentNegotiation) {
-            json(Json { ignoreUnknownKeys = true })
+            json(Json {
+                ignoreUnknownKeys = true
+                // Emit literal fields that have Kotlin defaults (platform, type) —
+                // the server's schema discriminates on them
+                encodeDefaults = true
+                // But never send "field": null for absent optionals
+                explicitNulls = false
+            })
         }
 
         defaultRequest {

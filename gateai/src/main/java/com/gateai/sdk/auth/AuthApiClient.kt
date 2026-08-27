@@ -24,7 +24,8 @@ class AuthApiClient(private val httpClient: GateHttpClient) {
         deviceKeyJwk: DeviceKeyJwk,
         integrityToken: String?,
         dpopProof: String,
-        developmentToken: String?
+        developmentToken: String?,
+        nonce: String? = null
     ): TokenResponse {
         val attestationPayload = integrityToken?.let {
             AttestationPayload(
@@ -39,6 +40,8 @@ class AuthApiClient(private val httpClient: GateHttpClient) {
             deviceKeyJwk = deviceKeyJwk,
             attestation = attestationPayload,
             devToken = developmentToken,
+            // Server requires the challenge nonce alongside attestation
+            nonce = if (attestationPayload != null) nonce else null,
             dpop = dpopProof
         )
 

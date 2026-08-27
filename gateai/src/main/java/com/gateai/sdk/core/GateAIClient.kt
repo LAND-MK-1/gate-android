@@ -288,7 +288,8 @@ class GateAIClient internal constructor(
                 deviceKeyJwk = deviceKey.jwk,
                 integrityToken = integrityToken,
                 dpopProof = dpop,
-                developmentToken = configuration.developmentToken
+                developmentToken = configuration.developmentToken,
+                nonce = challenge.nonce
             )
 
             val expiresAt = lockedNow + response.expiresInSeconds
@@ -384,7 +385,8 @@ internal object DPoPBuilder {
         val header = mapOf(
             "typ" to "dpop+jwt",
             "alg" to "ES256",
-            "jwk" to jwk
+            // Plain map: the canonical JSON signer only serializes primitives/maps
+            "jwk" to mapOf("kty" to jwk.kty, "crv" to jwk.crv, "x" to jwk.x, "y" to jwk.y)
         )
 
         val payload = buildMap {

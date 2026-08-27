@@ -42,6 +42,7 @@ data class TokenRequest(
     @SerialName("device_key_jwk") val deviceKeyJwk: DeviceKeyJwk,
     val attestation: AttestationPayload? = null,
     @SerialName("dev_token") val devToken: String? = null,
+    val nonce: String? = null,
     val dpop: String
 )
 
