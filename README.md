@@ -300,14 +300,26 @@ client.userStatus = "premium" // or "free", "trial", etc.
 
 ### Analytics Headers
 
-The SDK automatically includes these headers on all requests:
+The SDK includes these headers on all requests:
 
-- `X-Client-Locale` - User's language/region (e.g., "en-US")
-- `X-App-Version` - App version from manifest
-- `X-OS-Version` - Android OS version
-- `X-Device-Identifier` - Android ID (per-app, per-device)
-- `X-Device-Type` - Device manufacturer and model
-- `X-User-Status` - Custom user segment (if set)
+| Header | Set by | Description |
+|---|---|---|
+| `X-Client-Locale` | Automatic | User's language/region (e.g., "en-US") |
+| `X-App-Version` | Automatic | App version from manifest |
+| `X-OS-Version` | Automatic | Android OS version |
+| `X-Device-Identifier` | Automatic | Android ID (per-app, per-device) |
+| `X-Device-Type` | Automatic | Device manufacturer and model |
+| `X-Device-Model` | Automatic | Raw hardware model identifier (e.g., "SM-G991U") |
+| `X-Environment` | Automatic | `development` (debuggable build) or `production` |
+| `X-SDK-Version` | Automatic | Gate/AI SDK version (e.g., "1.1.0") |
+| `X-User-Status` | Developer (`client.userStatus`) | Custom user segment (e.g., "free", "premium") |
+| `X-User-Identifier` | Developer (`client.userIdentifier`) | Opaque user/account ID from your own system |
+| `X-App-Feature` | Developer (`client.appFeature`) | Feature tag for cost attribution (e.g., "chat"); can be overridden per request via `additionalHeaders` |
+
+Developer-set headers are only sent when the corresponding property is set.
+
+> **Note:** `X-User-Identifier` should be an opaque ID (e.g., a UUID or database key) —
+> never an email address or name. Do not send PII in analytics headers.
 
 ## Error Handling
 

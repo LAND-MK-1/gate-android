@@ -8,6 +8,9 @@ plugins {
 
 group = "com.gateai.sdk"
 
+// Read version from gradle.properties
+val versionName: String by project
+
 android {
     namespace = "com.gateai.sdk"
     compileSdk = 34
@@ -17,6 +20,9 @@ android {
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
         consumerProguardFiles("consumer-rules.pro")
+
+        // Expose the SDK version (from gradle.properties) to code for the X-SDK-Version header
+        buildConfigField("String", "SDK_VERSION", "\"$versionName\"")
     }
 
     buildTypes {
@@ -69,9 +75,6 @@ dependencies {
     testImplementation("junit:junit:4.13.2")
     testImplementation(kotlin("test"))
 }
-
-// Read version from gradle.properties
-val versionName: String by project
 
 android {
     publishing {

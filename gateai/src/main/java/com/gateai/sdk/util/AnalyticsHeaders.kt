@@ -1,8 +1,10 @@
 package com.gateai.sdk.util
 
 import android.content.Context
+import android.content.pm.ApplicationInfo
 import android.os.Build
 import android.provider.Settings
+import com.gateai.sdk.BuildConfig
 import java.util.Locale
 
 /**
@@ -12,7 +14,9 @@ import java.util.Locale
  */
 internal class AnalyticsHeaders(
     private val context: Context,
-    private val userStatus: String? = null
+    private val userStatus: String? = null,
+    private val userIdentifier: String? = null,
+    private val appFeature: String? = null
 ) {
     /**
      * Generates a map of analytics headers.
@@ -34,11 +38,26 @@ internal class AnalyticsHeaders(
         // X-User-Status: Custom status provided by developer
         userStatus?.let { headers["X-User-Status"] = it }
 
+        // X-User-Identifier: Opaque user/account ID provided by developer (no PII)
+        userIdentifier?.let { headers["X-User-Identifier"] = it }
+
+        // X-App-Feature: Feature tag for cost attribution provided by developer (e.g., "chat")
+        appFeature?.let { headers["X-App-Feature"] = it }
+
+        // X-Environment: "development" for debuggable builds, "production" otherwise
+        environment()?.let { headers["X-Environment"] = it }
+
         // X-Device-Identifier: Android ID (unique per-app, per-device identifier)
         deviceIdentifier()?.let { headers["X-Device-Identifier"] = it }
 
         // X-Device-Type: Device model (e.g., "Pixel 8", "Samsung Galaxy S23")
         deviceType()?.let { headers["X-Device-Type"] = it }
+
+        // X-Device-Model: Raw hardware model identifier (e.g., "SM-G991U")
+        deviceModel()?.let { headers["X-Device-Model"] = it }
+
+        // X-SDK-Version: Gate/AI SDK version (e.g., "1.1.0")
+        sdkVersion()?.let { headers["X-SDK-Version"] = it }
 
         return headers
     }
@@ -64,6 +83,32 @@ internal class AnalyticsHeaders(
     private fun osVersion(): String? {
         return try {
             Build.VERSION.RELEASE
+        } catch (e: Exception) {
+            null
+        }
+    }
+
+    private fun environment(): String? {
+        return try {
+            val debuggable = (context.applicationInfo.flags and ApplicationInfo.FLAG_DEBUGGABLE) != 0
+            if (debuggable) "development" else "production"
+        } catch (e: Exception) {
+            null
+        }
+    }
+
+    private fun deviceModel(): String? {
+        return try {
+            // Raw hardware model identifier, e.g. "SM-G991U"
+            Build.MODEL
+        } catch (e: Exception) {
+            null
+        }
+    }
+
+    private fun sdkVersion(): String? {
+        return try {
+            BuildConfig.SDK_VERSION
         } catch (e: Exception) {
             null
         }

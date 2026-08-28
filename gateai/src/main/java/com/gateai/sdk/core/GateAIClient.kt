@@ -89,6 +89,41 @@ class GateAIClient internal constructor(
     var userStatus: String? = null
 
     /**
+     * Optional opaque user identifier for analytics (e.g., an account ID from your own system).
+     *
+     * This value is included in the `X-User-Identifier` header on all authenticated requests.
+     * Set this property to attribute usage and costs to individual users in your analytics.
+     * Use an opaque ID — never an email address or name (no PII).
+     *
+     * ## Example
+     *
+     * ```kotlin
+     * client.userIdentifier = "user-8f2a41c7"
+     * // or
+     * client.userIdentifier = null // on logout
+     * ```
+     */
+    var userIdentifier: String? = null
+
+    /**
+     * Optional app feature tag for analytics (e.g., "chat", "summarize", "onboarding").
+     *
+     * This value is included in the `X-App-Feature` header on all authenticated requests.
+     * Set this property to attribute usage and costs to specific features of your app.
+     * It can also be overridden per request by passing an `X-App-Feature` entry in
+     * `additionalHeaders`.
+     *
+     * ## Example
+     *
+     * ```kotlin
+     * client.appFeature = "chat"
+     * // or
+     * client.appFeature = "summarize"
+     * ```
+     */
+    var appFeature: String? = null
+
+    /**
      * Generates authorization headers for a path relative to the configured base URL.
      *
      * This method automatically obtains a valid access token, generates the DPoP proof,
@@ -131,7 +166,7 @@ class GateAIClient internal constructor(
         )
 
         // Add analytics headers
-        val analyticsHeaders = AnalyticsHeaders(context, userStatus)
+        val analyticsHeaders = AnalyticsHeaders(context, userStatus, userIdentifier, appFeature)
         headers.putAll(analyticsHeaders.headers())
 
         return headers
