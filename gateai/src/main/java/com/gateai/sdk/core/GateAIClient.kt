@@ -1,6 +1,7 @@
 package com.gateai.sdk.core
 
 import android.content.Context
+import android.content.pm.ApplicationInfo
 import com.gateai.sdk.auth.AuthApiClient
 import com.gateai.sdk.logging.AndroidGateLogger
 import com.gateai.sdk.logging.GateLogger
@@ -166,7 +167,7 @@ class GateAIClient internal constructor(
         )
 
         // Add analytics headers
-        val analyticsHeaders = AnalyticsHeaders(context, userStatus, userIdentifier, appFeature)
+        val analyticsHeaders = AnalyticsHeaders(context, userStatus, userIdentifier, appFeature, configuration.deviceIdentifierEnabled)
         headers.putAll(analyticsHeaders.headers())
 
         return headers
@@ -264,20 +265,21 @@ class GateAIClient internal constructor(
         additionalHeaders: Map<String, String>
     ): RawResponse {
         logger.debug("Performing proxy request: $method $url")
-        
-        // Try initial request without nonce
-        val initial = sendProxyRequest(url, method, body, additionalHeaders, nonce = null)
-        
-        // Handle DPoP nonce challenge
-        if (initial.status == 401) {
-            val nonce = extractDPoPNonce(initial.headers)
+
+        // Try initial request without nonce. postRaw throws GateApiException on any
+        // non-2xx, so a DPoP-Nonce challenge (a 401 carrying the nonce header) surfaces
+        // as an exception rather than a returned response — intercept and retry once.
+        return try {
+            sendProxyRequest(url, method, body, additionalHeaders, nonce = null)
+        } catch (e: GateApiException) {
+            val nonce = if (e.statusCode == 401) extractDPoPNonce(e.headers) else null
             if (nonce != null) {
                 logger.info("Received DPoP-Nonce challenge, retrying request with nonce")
-                return sendProxyRequest(url, method, body, additionalHeaders, nonce = nonce)
+                sendProxyRequest(url, method, body, additionalHeaders, nonce = nonce)
+            } else {
+                throw e
             }
         }
-        
-        return initial
     }
 
     private suspend fun sendProxyRequest(
@@ -362,17 +364,33 @@ class GateAIClient internal constructor(
             configuration: GateAIConfiguration,
             logger: GateLogger = AndroidGateLogger()
         ): GateAIClient {
-            val deviceKeyManager = DeviceKeyManager.create(context)
-            val httpClient = GateHttpClient(configuration, logger)
-            val authApiClient = AuthApiClient(httpClient)
-            val integrityManager = PlayIntegrityManager(context, configuration.cloudProjectNumber)
-            val timeProvider = SystemTimeProvider()
-
             logger.setLogLevel(configuration.logLevel)
+
+            // A dev token bypasses Play Integrity attestation entirely, so it must never be
+            // honored in a shipped (non-debuggable) build. If one is present in a release
+            // build, drop it and fall back to real attestation rather than silently shipping
+            // an attestation bypass.
+            val isDebuggable = (context.applicationInfo.flags and ApplicationInfo.FLAG_DEBUGGABLE) != 0
+            val effectiveConfiguration = if (configuration.developmentToken != null && !isDebuggable) {
+                logger.error(
+                    "developmentToken is set in a non-debuggable (release) build and will be ignored. " +
+                        "Dev tokens bypass Play Integrity attestation and must never ship in a release build; " +
+                        "supply it only via a debug-only BuildConfig field."
+                )
+                configuration.copy(developmentToken = null)
+            } else {
+                configuration
+            }
+
+            val deviceKeyManager = DeviceKeyManager.create(context)
+            val httpClient = GateHttpClient(effectiveConfiguration, logger)
+            val authApiClient = AuthApiClient(httpClient)
+            val integrityManager = PlayIntegrityManager(context, effectiveConfiguration.cloudProjectNumber)
+            val timeProvider = SystemTimeProvider()
 
             return GateAIClient(
                 context = context.applicationContext,
-                configuration = configuration,
+                configuration = effectiveConfiguration,
                 deviceKeyManager = deviceKeyManager,
                 authApiClient = authApiClient,
                 playIntegrityManager = integrityManager,

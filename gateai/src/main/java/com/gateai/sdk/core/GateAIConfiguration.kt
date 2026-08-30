@@ -9,7 +9,15 @@ data class GateAIConfiguration(
     val signingCertSha256: String,
     val developmentToken: String? = null,
     val cloudProjectNumber: Long? = null,
-    val logLevel: LogLevel = LogLevel.INFO
+    val logLevel: LogLevel = LogLevel.INFO,
+    /**
+     * When true, the SDK sends the device's ANDROID_ID as the X-Device-Identifier header.
+     * ANDROID_ID is a persistent per-app, per-device identifier; enabling this creates a
+     * data-collection disclosure obligation (Play Data safety, privacy policy, GDPR/COPPA
+     * depending on your app). Defaults to false — opt in only if you need per-device
+     * analytics and have disclosed it.
+     */
+    val deviceIdentifierEnabled: Boolean = false
 ) {
     init {
         require(baseUrl.startsWith("https://")) { "baseUrl must start with https://" }

@@ -16,7 +16,8 @@ internal class AnalyticsHeaders(
     private val context: Context,
     private val userStatus: String? = null,
     private val userIdentifier: String? = null,
-    private val appFeature: String? = null
+    private val appFeature: String? = null,
+    private val sendDeviceIdentifier: Boolean = false
 ) {
     /**
      * Generates a map of analytics headers.
@@ -47,8 +48,11 @@ internal class AnalyticsHeaders(
         // X-Environment: "development" for debuggable builds, "production" otherwise
         environment()?.let { headers["X-Environment"] = it }
 
-        // X-Device-Identifier: Android ID (unique per-app, per-device identifier)
-        deviceIdentifier()?.let { headers["X-Device-Identifier"] = it }
+        // X-Device-Identifier: Android ID (unique per-app, per-device identifier).
+        // Opt-in only — persistent device identifiers carry a disclosure obligation.
+        if (sendDeviceIdentifier) {
+            deviceIdentifier()?.let { headers["X-Device-Identifier"] = it }
+        }
 
         // X-Device-Type: Device model (e.g., "Pixel 8", "Samsung Galaxy S23")
         deviceType()?.let { headers["X-Device-Type"] = it }
