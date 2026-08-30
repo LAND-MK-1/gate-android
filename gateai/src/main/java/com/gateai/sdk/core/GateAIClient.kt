@@ -77,7 +77,8 @@ class GateAIClient internal constructor(
      * Optional user status for analytics (e.g., "free", "premium", "trial").
      *
      * This value is included in the `X-User-Status` header on all authenticated requests.
-     * Set this property to track different user segments or subscription tiers in your analytics.
+     * Set this property to track different user segments in your analytics. For tier-based
+     * usage limit enforcement, use [userTier] instead.
      *
      * ## Example
      *
@@ -88,6 +89,24 @@ class GateAIClient internal constructor(
      * ```
      */
     var userStatus: String? = null
+
+    /**
+     * Optional user plan tier for usage limit enforcement (e.g., "free", "pro").
+     *
+     * This value is included in the `X-User-Tier` header on all authenticated requests.
+     * Set this property to enforce per-tier usage limits: limits configured in the
+     * Gate/AI Portal match this value exactly (case-sensitive). For free-form analytics
+     * segmentation, use [userStatus] instead.
+     *
+     * ## Example
+     *
+     * ```kotlin
+     * client.userTier = "pro"
+     * // or
+     * client.userTier = "free"
+     * ```
+     */
+    var userTier: String? = null
 
     /**
      * Optional opaque user identifier for analytics (e.g., an account ID from your own system).
@@ -194,7 +213,7 @@ class GateAIClient internal constructor(
 
         // Add analytics headers
         val analyticsHeaders = AnalyticsHeaders(
-            context, userStatus, userIdentifier, appFeature, validatedQuotaAnchorDay()
+            context, userStatus, userTier, userIdentifier, appFeature, validatedQuotaAnchorDay()
         )
         headers.putAll(analyticsHeaders.headers())
 

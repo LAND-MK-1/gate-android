@@ -313,6 +313,7 @@ The SDK includes these headers on all requests:
 | `X-Environment` | Automatic | `development` (debuggable build) or `production` |
 | `X-SDK-Version` | Automatic | Gate/AI SDK version (e.g., "1.1.0") |
 | `X-User-Status` | Developer (`client.userStatus`) | Custom user segment (e.g., "free", "premium") |
+| `X-User-Tier` | Developer (`client.userTier`) | User's plan tier (e.g., "free", "pro"); matched exactly (case-sensitive) against Portal-configured per-tier usage limits |
 | `X-User-Identifier` | Developer (`client.userIdentifier`) | Opaque user/account ID from your own system |
 | `X-App-Feature` | Developer (`client.appFeature`) | Feature tag for cost attribution (e.g., "chat"); can be overridden per request via `additionalHeaders` |
 | `X-Quota-Anchor-Day` | Developer (`client.quotaAnchorDay`) | Day-of-month (1-31) the user's subscription renews; anchors billing-cycle usage windows |
@@ -328,6 +329,14 @@ Gates can enforce per-device usage limits over daily, calendar-month, rolling
 30-day, or user-billing-cycle windows (configured in the Gate/AI portal). The
 SDK surfaces everything your app needs to render limit UI without parsing
 headers or JSON yourself.
+
+**Key per-tier limits off the user's plan** by setting `client.userTier`. Limits
+configured per tier in the Gate/AI Portal match this value exactly
+(case-sensitive):
+
+```kotlin
+client.userTier = "pro"
+```
 
 **Anchor the billing-cycle window** by telling the SDK which day of the month
 the user's subscription renews (read it from Play Billing / RevenueCat):

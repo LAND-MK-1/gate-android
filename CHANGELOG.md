@@ -8,6 +8,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [1.2.0] - 2026-08-30
 
 ### Added
+- `GateAIClient.userTier` property — the user's plan tier (e.g., "free", "pro"), sent as
+  the `X-User-Tier` header; Portal-configured per-tier usage limits match it exactly
+  (case-sensitive), while `userStatus` remains free-form analytics segmentation
 - `GateAIClient.quotaAnchorDay` property — day-of-month (1-31) the user's subscription
   renews, sent as the `X-Quota-Anchor-Day` header to anchor billing-cycle device usage
   windows (invalid values are dropped with a warning)
