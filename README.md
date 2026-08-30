@@ -352,8 +352,9 @@ and stripped before the request reaches the AI provider.
 
 **Read remaining quota** from any successful response — when the gate has
 device limits configured, the proxy adds `X-Quota-Requests-Remaining`,
-`X-Quota-Tokens-Remaining`, and `X-Quota-Reset` headers, exposed as
-`response.quotaStatus`:
+`X-Quota-Tokens-Remaining`, `X-Quota-Requests-Reset`, and
+`X-Quota-Tokens-Reset` headers (each reset is the ISO 8601 reset time of that
+metric's binding window), exposed as `response.quotaStatus`:
 
 ```kotlin
 val response = client.performProxyRequest(
@@ -364,7 +365,7 @@ val response = client.performProxyRequest(
 )
 
 response.quotaStatus?.let { quota ->
-    println("${quota.requestsRemaining} requests left, resets at ${quota.resetsAt}")
+    println("${quota.requestsRemaining} requests left, resets at ${quota.requestsResetAt}")
 }
 ```
 
