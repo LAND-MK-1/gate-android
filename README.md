@@ -315,11 +315,75 @@ The SDK includes these headers on all requests:
 | `X-User-Status` | Developer (`client.userStatus`) | Custom user segment (e.g., "free", "premium") |
 | `X-User-Identifier` | Developer (`client.userIdentifier`) | Opaque user/account ID from your own system |
 | `X-App-Feature` | Developer (`client.appFeature`) | Feature tag for cost attribution (e.g., "chat"); can be overridden per request via `additionalHeaders` |
+| `X-Quota-Anchor-Day` | Developer (`client.quotaAnchorDay`) | Day-of-month (1-31) the user's subscription renews; anchors billing-cycle usage windows |
 
 Developer-set headers are only sent when the corresponding property is set.
 
 > **Note:** `X-User-Identifier` should be an opaque ID (e.g., a UUID or database key) —
 > never an email address or name. Do not send PII in analytics headers.
+
+## Usage limits & quotas
+
+Gates can enforce per-device usage limits over daily, calendar-month, rolling
+30-day, or user-billing-cycle windows (configured in the Gate/AI portal). The
+SDK surfaces everything your app needs to render limit UI without parsing
+headers or JSON yourself.
+
+**Anchor the billing-cycle window** by telling the SDK which day of the month
+the user's subscription renews (read it from Play Billing / RevenueCat):
+
+```kotlin
+client.quotaAnchorDay = 15 // subscription renews on the 15th
+```
+
+Days 29-31 are fine — the server clamps to short months. Changing the value
+later (e.g., after a resubscribe) is safe; windows are computed server-side at
+read time. The `X-Quota-Anchor-Day` header is consumed by the Gate/AI proxy
+and stripped before the request reaches the AI provider.
+
+**Read remaining quota** from any successful response — when the gate has
+device limits configured, the proxy adds `X-Quota-Requests-Remaining`,
+`X-Quota-Tokens-Remaining`, and `X-Quota-Reset` headers, exposed as
+`response.quotaStatus`:
+
+```kotlin
+val response = client.performProxyRequest(
+    path = "openai/chat/completions",
+    method = HttpMethod.POST,
+    body = requestBody.toByteArray(),
+    additionalHeaders = mapOf("Content-Type" to "application/json")
+)
+
+response.quotaStatus?.let { quota ->
+    println("${quota.requestsRemaining} requests left, resets at ${quota.resetsAt}")
+}
+```
+
+**Handle the structured 429** — when a request is rejected for exceeding a
+limit, the thrown `GateApiException` carries a parsed `RateLimitInfo`:
+
+```kotlin
+try {
+    client.performProxyRequest(...)
+} catch (e: GateApiException) {
+    val info = e.rateLimitInfo
+    if (info != null) {
+        when (info.window) {
+            is RateLimitInfo.Window.Cycle,
+            is RateLimitInfo.Window.Monthly ->
+                showPaywall(resetsAt = info.resetsAt) // upgrade moment
+            else ->
+                showTryAgainLater(info.message)
+        }
+    } else {
+        // Not a Gate/AI rate-limit rejection
+        throw e
+    }
+}
+```
+
+`info.window` decodes unknown-safely: window types added in future server
+versions arrive as `Window.Unknown(rawValue)` instead of failing to parse.
 
 ## Error Handling
 

@@ -16,7 +16,8 @@ internal class AnalyticsHeaders(
     private val context: Context,
     private val userStatus: String? = null,
     private val userIdentifier: String? = null,
-    private val appFeature: String? = null
+    private val appFeature: String? = null,
+    private val quotaAnchorDay: Int? = null
 ) {
     /**
      * Generates a map of analytics headers.
@@ -43,6 +44,10 @@ internal class AnalyticsHeaders(
 
         // X-App-Feature: Feature tag for cost attribution provided by developer (e.g., "chat")
         appFeature?.let { headers["X-App-Feature"] = it }
+
+        // X-Quota-Anchor-Day: Day-of-month the user's subscription renews (1-31),
+        // provided by developer; anchors billing-cycle device usage windows
+        quotaAnchorDay?.let { headers["X-Quota-Anchor-Day"] = it.toString() }
 
         // X-Environment: "development" for debuggable builds, "production" otherwise
         environment()?.let { headers["X-Environment"] = it }
