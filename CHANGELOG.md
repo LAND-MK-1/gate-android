@@ -5,7 +5,7 @@ All notable changes to the Gate/AI Android SDK will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [1.2.0] - 2026-08-30
+## [1.2.0] - 2026-08-31
 
 ### Added
 - `GateAIClient.userTier` property — the user's plan tier (e.g., "free", "pro"), sent as
@@ -27,6 +27,23 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Unit tests for quota header parsing, 429 body parsing, anchor-day validation, and
   ISO 8601 date parsing
 - README "Usage limits & quotas" section
+- Analytics: `GateAIClient.userIdentifier` (`X-User-Identifier`) and
+  `GateAIClient.appFeature` (`X-App-Feature`) developer-set properties, plus automatic
+  `X-Environment` (development/production via `FLAG_DEBUGGABLE`), `X-Device-Model`
+  (`Build.MODEL`), and `X-SDK-Version` headers
+- `GateAIConfiguration.deviceIdentifierEnabled` (default `false`) — opt in to sending the
+  `ANDROID_ID`-based `X-Device-Identifier` header; persistent device identifiers carry a
+  data-collection disclosure obligation, so this is off unless you turn it on
+
+### Fixed
+- The DPoP-Nonce 401 retry was unreachable because `postRaw` threw on any non-2xx;
+  `executeProxyRequest` now catches the `GateApiException` and retries once with the
+  server-supplied nonce
+
+### Security
+- A development token bypasses Play Integrity, so `GateAIClient.create()` now ignores it
+  in non-debuggable (release) builds and falls back to real attestation, logging an error
+  when the token is dropped
 
 ## [1.0.0] - 2026-08-27
 
@@ -77,7 +94,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 
 ### Planned
-- Analytics headers support
 - Instrumented tests with Play Integrity mocking
 - Unit tests for key components
 - Kotlin Multiplatform support consideration
@@ -85,5 +101,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Network retry policies
 - Request/response logging interceptor
 
-[1.0.0]: https://github.com/YOUR_ORG/GateAI/releases/tag/v1.0.0
+[1.2.0]: https://github.com/LAND-MK-1/gate-android/releases/tag/v1.2.0
+[1.0.0]: https://github.com/LAND-MK-1/gate-android/releases/tag/v1.0.0
 
