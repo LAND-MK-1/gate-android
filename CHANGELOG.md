@@ -5,7 +5,7 @@ All notable changes to the Gate/AI Android SDK will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [1.2.0] - 2026-08-31
+## [1.1.0] - 2026-08-31
 
 ### Added
 - `GateAIClient.userTier` property — the user's plan tier (e.g., "free", "pro"), sent as
@@ -101,6 +101,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Network retry policies
 - Request/response logging interceptor
 
-[1.2.0]: https://github.com/GateAI-net/gate-android/releases/tag/v1.2.0
+[1.1.0]: https://github.com/GateAI-net/gate-android/releases/tag/v1.1.0
 [1.0.0]: https://github.com/GateAI-net/gate-android/releases/tag/v1.0.0
 

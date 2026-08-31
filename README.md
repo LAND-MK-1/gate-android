@@ -32,7 +32,7 @@ dependencyResolutionManagement {
 
 // app/build.gradle.kts
 dependencies {
-    implementation("com.github.GateAI-net:gate-android:v1.2.0")
+    implementation("com.github.GateAI-net:gate-android:v1.1.0")
 }
 ```
 
