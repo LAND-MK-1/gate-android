@@ -101,6 +101,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Network retry policies
 - Request/response logging interceptor
 
-[1.2.0]: https://github.com/LAND-MK-1/gate-android/releases/tag/v1.2.0
-[1.0.0]: https://github.com/LAND-MK-1/gate-android/releases/tag/v1.0.0
+[1.2.0]: https://github.com/GateAI-net/gate-android/releases/tag/v1.2.0
+[1.0.0]: https://github.com/GateAI-net/gate-android/releases/tag/v1.0.0
 

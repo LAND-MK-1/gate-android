@@ -17,7 +17,7 @@ Android SDK for Gate/AI authentication using Play Integrity, DPoP (RFC 9449), an
 
 ### Gradle
 
-The SDK is distributed through [JitPack](https://jitpack.io/#LAND-MK-1/gate-android). Add the
+The SDK is distributed through [JitPack](https://jitpack.io/#GateAI-net/gate-android). Add the
 JitPack repository, then depend on the tagged release:
 
 ```kotlin
@@ -32,7 +32,7 @@ dependencyResolutionManagement {
 
 // app/build.gradle.kts
 dependencies {
-    implementation("com.github.LAND-MK-1:gate-android:v1.2.0")
+    implementation("com.github.GateAI-net:gate-android:v1.2.0")
 }
 ```
 

@@ -99,7 +99,7 @@ publishing {
             pom {
                 name.set("Gate/AI Android SDK")
                 description.set("Android SDK for Gate/AI authentication using Play Integrity, DPoP, and hardware-backed device keys")
-                url.set("https://github.com/LAND-MK-1/gate-android")
+                url.set("https://github.com/GateAI-net/gate-android")
 
                 licenses {
                     license {
@@ -117,9 +117,9 @@ publishing {
                 }
 
                 scm {
-                    connection.set("scm:git:git://github.com/LAND-MK-1/gate-android.git")
-                    developerConnection.set("scm:git:ssh://github.com/LAND-MK-1/gate-android.git")
-                    url.set("https://github.com/LAND-MK-1/gate-android")
+                    connection.set("scm:git:git://github.com/GateAI-net/gate-android.git")
+                    developerConnection.set("scm:git:ssh://github.com/GateAI-net/gate-android.git")
+                    url.set("https://github.com/GateAI-net/gate-android")
                 }
             }
         }
@@ -128,7 +128,7 @@ publishing {
     repositories {
         maven {
             name = "GitHubPackages"
-            url = uri("https://maven.pkg.github.com/LAND-MK-1/gate-android")
+            url = uri("https://maven.pkg.github.com/GateAI-net/gate-android")
             credentials {
                 username = project.findProperty("gpr.user") as String? ?: System.getenv("GITHUB_ACTOR")
                 password = project.findProperty("gpr.key") as String? ?: System.getenv("GITHUB_TOKEN")
