@@ -15,8 +15,10 @@ import java.util.Locale
 internal class AnalyticsHeaders(
     private val context: Context,
     private val userStatus: String? = null,
+    private val userTier: String? = null,
     private val userIdentifier: String? = null,
     private val appFeature: String? = null,
+    private val quotaAnchorDay: Int? = null,
     private val sendDeviceIdentifier: Boolean = false
 ) {
     /**
@@ -39,11 +41,19 @@ internal class AnalyticsHeaders(
         // X-User-Status: Custom status provided by developer
         userStatus?.let { headers["X-User-Status"] = it }
 
+        // X-User-Tier: Plan tier provided by developer; matched exactly (case-sensitive)
+        // against Portal-configured per-tier usage limits
+        userTier?.let { headers["X-User-Tier"] = it }
+
         // X-User-Identifier: Opaque user/account ID provided by developer (no PII)
         userIdentifier?.let { headers["X-User-Identifier"] = it }
 
         // X-App-Feature: Feature tag for cost attribution provided by developer (e.g., "chat")
         appFeature?.let { headers["X-App-Feature"] = it }
+
+        // X-Quota-Anchor-Day: Day-of-month the user's subscription renews (1-31),
+        // provided by developer; anchors billing-cycle device usage windows
+        quotaAnchorDay?.let { headers["X-Quota-Anchor-Day"] = it.toString() }
 
         // X-Environment: "development" for debuggable builds, "production" otherwise
         environment()?.let { headers["X-Environment"] = it }

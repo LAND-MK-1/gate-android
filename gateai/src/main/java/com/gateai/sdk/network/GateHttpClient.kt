@@ -117,5 +117,20 @@ data class RawResponse(
     val status: Int,
     val headers: Map<String, String>,
     val body: String?
-)
+) {
+    /**
+     * Remaining device quota parsed from the `X-Quota-*` response headers,
+     * or null when the gate has no device usage limits configured.
+     *
+     * ## Example
+     *
+     * ```kotlin
+     * response.quotaStatus?.let { quota ->
+     *     // e.g., "${quota.requestsRemaining} requests left"
+     * }
+     * ```
+     */
+    val quotaStatus: QuotaStatus?
+        get() = QuotaStatus.fromHeaders(headers)
+}
 

@@ -7,6 +7,7 @@ import com.gateai.sdk.logging.AndroidGateLogger
 import com.gateai.sdk.logging.GateLogger
 import com.gateai.sdk.network.GateApiException
 import com.gateai.sdk.network.GateHttpClient
+import com.gateai.sdk.network.QuotaAnchorDay
 import com.gateai.sdk.network.RawResponse
 import com.gateai.sdk.playintegrity.PlayIntegrityManager
 import com.gateai.sdk.security.DeviceKeyManager
@@ -77,7 +78,8 @@ class GateAIClient internal constructor(
      * Optional user status for analytics (e.g., "free", "premium", "trial").
      *
      * This value is included in the `X-User-Status` header on all authenticated requests.
-     * Set this property to track different user segments or subscription tiers in your analytics.
+     * Set this property to track different user segments in your analytics. For tier-based
+     * usage limit enforcement, use [userTier] instead.
      *
      * ## Example
      *
@@ -88,6 +90,24 @@ class GateAIClient internal constructor(
      * ```
      */
     var userStatus: String? = null
+
+    /**
+     * Optional user plan tier for usage limit enforcement (e.g., "free", "pro").
+     *
+     * This value is included in the `X-User-Tier` header on all authenticated requests.
+     * Set this property to enforce per-tier usage limits: limits configured in the
+     * Gate/AI Portal match this value exactly (case-sensitive). For free-form analytics
+     * segmentation, use [userStatus] instead.
+     *
+     * ## Example
+     *
+     * ```kotlin
+     * client.userTier = "pro"
+     * // or
+     * client.userTier = "free"
+     * ```
+     */
+    var userTier: String? = null
 
     /**
      * Optional opaque user identifier for analytics (e.g., an account ID from your own system).
@@ -123,6 +143,32 @@ class GateAIClient internal constructor(
      * ```
      */
     var appFeature: String? = null
+
+    /**
+     * Optional day-of-month (1-31) the user's subscription renews, for billing-cycle quotas.
+     *
+     * This value is included in the `X-Quota-Anchor-Day` header on all authenticated requests.
+     * Set it to the day-of-month from the user's subscription renewal date — read it from
+     * Play Billing / RevenueCat (or your own backend). It unlocks "user's billing cycle"
+     * device usage windows configured on your gates; without it, the gate's configured
+     * fallback period applies.
+     *
+     * Days 29-31 are fine to send as-is — the server clamps to short months. Changing it
+     * later (e.g., after a resubscribe) is safe: windows are computed server-side at read
+     * time. Values outside 1-31 are dropped with a warning and not sent.
+     *
+     * ## Example
+     *
+     * ```kotlin
+     * client.quotaAnchorDay = 15 // subscription renews on the 15th
+     * // or
+     * client.quotaAnchorDay = null // no known renewal date
+     * ```
+     */
+    var quotaAnchorDay: Int? = null
+
+    /** Invalid anchor-day value already warned about, so the warning is logged once. */
+    private var warnedInvalidQuotaAnchorDay: Int? = null
 
     /**
      * Generates authorization headers for a path relative to the configured base URL.
@@ -167,10 +213,25 @@ class GateAIClient internal constructor(
         )
 
         // Add analytics headers
-        val analyticsHeaders = AnalyticsHeaders(context, userStatus, userIdentifier, appFeature, configuration.deviceIdentifierEnabled)
+        val analyticsHeaders = AnalyticsHeaders(
+            context, userStatus, userTier, userIdentifier, appFeature, validatedQuotaAnchorDay(),
+            sendDeviceIdentifier = configuration.deviceIdentifierEnabled
+        )
         headers.putAll(analyticsHeaders.headers())
 
         return headers
+    }
+
+    private fun validatedQuotaAnchorDay(): Int? {
+        val day = quotaAnchorDay ?: return null
+        val sanitized = QuotaAnchorDay.sanitize(day)
+        if (sanitized == null && warnedInvalidQuotaAnchorDay != day) {
+            warnedInvalidQuotaAnchorDay = day
+            logger.warn(
+                "quotaAnchorDay must be a day-of-month (1-31); ignoring invalid value $day"
+            )
+        }
+        return sanitized
     }
 
     /**

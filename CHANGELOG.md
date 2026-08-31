@@ -5,6 +5,29 @@ All notable changes to the Gate/AI Android SDK will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.2.0] - 2026-08-30
+
+### Added
+- `GateAIClient.userTier` property — the user's plan tier (e.g., "free", "pro"), sent as
+  the `X-User-Tier` header; Portal-configured per-tier usage limits match it exactly
+  (case-sensitive), while `userStatus` remains free-form analytics segmentation
+- `GateAIClient.quotaAnchorDay` property — day-of-month (1-31) the user's subscription
+  renews, sent as the `X-Quota-Anchor-Day` header to anchor billing-cycle device usage
+  windows (invalid values are dropped with a warning)
+- `QuotaStatus` — remaining device quota parsed from the `X-Quota-Requests-Remaining`,
+  `X-Quota-Tokens-Remaining`, `X-Quota-Requests-Reset`, `X-Quota-Tokens-Reset`,
+  `X-Quota-Requests-Limit`, and `X-Quota-Tokens-Limit` response headers (per-metric
+  reset times and window budgets), exposed as `RawResponse.quotaStatus`; includes
+  computed `requestsUsed`/`tokensUsed` and `requestsUsedFraction`/`tokensUsedFraction`
+  helpers for rendering usage meters
+- `RateLimitInfo` — structured rate-limit rejection details (code, message, window,
+  limit, used, resetsAt) parsed from 429 `rate_limited` bodies, exposed as
+  `GateApiException.rateLimitInfo`; window decoding is unknown-safe
+  (`Window.Unknown(rawValue)`)
+- Unit tests for quota header parsing, 429 body parsing, anchor-day validation, and
+  ISO 8601 date parsing
+- README "Usage limits & quotas" section
+
 ## [1.0.0] - 2026-08-27
 
 ### Fixed
